@@ -1,0 +1,1730 @@
+{
+	"info": {
+		"_postman_id": "0533a0bf-7747-466e-a5ce-749b03a4ccf5",
+		"name": "Med Rec Test Run",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authenticate",
+			"item": [
+				{
+					"name": "Client Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get client access token\", () => {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"client-access-token\", jsonData.accessToken);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain, application/json, text/json"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n \"clientName\": \"{{client-name}}\",\r\n \"clientSecret\": \"{{aspen-mobile-secret}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/client/token",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"client",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get access token\", () => {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"access-token\", jsonData.accessToken);",
+									"    pm.environment.set(\"refresh-token\", jsonData.refreshToken);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{client-access-token}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain, application/json, text/json"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"email\": \"{{login-email}}\",\r\n\t\"password\": \"{{password}}\",\r\n\t\"ipAddress\": \"127.0.0.1\",\r\n\t\"deviceId\": \"{{device-id}}\",\r\n\t\"geoLocation\": \"\",\r\n\t\"mfaToken\": \"\",\r\n\t\"resendToken\": \"false\",\r\n\t\"appVersion\": \"2.0.00\"\r\n}"
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/account/login",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"account",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get Opportunity",
+			"item": [
+				{
+					"name": "Get Available Med Rec Opps",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get opp id\", () => {\r",
+									"    var o = pm.response.json();\r",
+									"    var opportunityId = o.items[0].opportunityId;\r",
+									"    console.log(\"opportunity-id set to \" + opportunityId);\r",
+									"    pm.environment.set(\"opportunity-id\", opportunityId);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain, application/json, text/json"
+							}
+						],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/v2/MedRec?pageIndex=1&pageSize=20",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"v2",
+								"MedRec"
+							],
+							"query": [
+								{
+									"key": "pageIndex",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reserve",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"reserve successful\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/{{opportunity-id}}/reserve",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"{{opportunity-id}}",
+								"reserve"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Initiate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"initiate successful\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/initiate?ignoreHours=true",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"initiate"
+							],
+							"query": [
+								{
+									"key": "ignoreHours",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Med Rec Opps - Pending Consultion",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"opportunity-id is in the list\", function() {\r",
+									"    var data = pm.response.json();\r",
+									"    var oppId = parseInt(pm.environment.get(\"opportunity-id\"));\r",
+									"    pm.expect(data.map(e => (e.opportunityId))).to.include(oppId);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain, application/json, text/json"
+							}
+						],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/MedRec/PendingConsultation",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"MedRec",
+								"PendingConsultation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Med Rec Opp",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"opportunity-id is in the list\", function() {\r",
+									"    var data = pm.response.json();\r",
+									"    var oppId = parseInt(pm.environment.get(\"opportunity-id\"));\r",
+									"    pm.expect(data.opportunityId).to.equal(oppId);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain, application/json, text/json"
+							}
+						],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/MedRec/{{opportunity-id}}",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"MedRec",
+								"{{opportunity-id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Set Primary Prescriber",
+			"item": [
+				{
+					"name": "Get Prescribers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get primary prescriber\", () => {\r",
+									"    var response = pm.response.json();\r",
+									"    var prescriber = response[0];\r",
+									"    pm.environment.set(\"primary-prescriber\", JSON.stringify(prescriber));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/medications/prescribers",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"medications",
+								"prescribers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Prescribers",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\": \"FL\",\r\n    \"query\": \"smith\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/lists/prescribers/search",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"lists",
+								"prescribers",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Primary Prescriber",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{primary-prescriber}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/medications/primary-prescriber",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"medications",
+								"primary-prescriber"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Primary Prescriber",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"got back primary prescriber data\", () => {\r",
+									"    var response = pm.response.json();\r",
+									"    var primaryPrescriber = JSON.parse(pm.environment.get(\"primary-prescriber\"));\r",
+									"    pm.expect(response.lastName).to.equal(primaryPrescriber.lastName);\r",
+									"    pm.expect(response.addressLine1).to.equal(primaryPrescriber.addressLine1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/medications/primary-prescriber",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"medications",
+								"primary-prescriber"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Confirm Meds",
+			"item": [
+				{
+					"name": "Get Medications",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"_ = require('lodash');\r",
+									"\r",
+									"pm.test(\"get medications\", () => {\r",
+									"    var meds = _(pm.response.json())\r",
+									"        .flatMap(x => x.drugClasses)\r",
+									"        .flatMap(x => x.medications);\r",
+									"\r",
+									"    pm.environment.set('meds', JSON.stringify(meds));\r",
+									"    pm.environment.set('meds-i', 0);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/medications/med-rec",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"medications",
+								"med-rec"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sig",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var meds = JSON.parse(pm.environment.get('meds'));\r",
+									"var i = pm.environment.get('meds-i');\r",
+									"pm.expect(meds.length).to.be.greaterThan(i);\r",
+									"\r",
+									"var med = meds[i];\r",
+									"pm.environment.set('product-id', med.productId);\r",
+									"pm.environment.set('medication-name', med.medicationName);\r",
+									"pm.environment.set('medication-is-self-prescribed', med.isSelfPrescribed);\r",
+									"pm.environment.set('medication-prescriber-id', med.prescriberId);\r",
+									"pm.environment.set('medication-presriber', JSON.stringify(med.prescriber));\r",
+									"pm.environment.set('medication-status', med.medicationStatus);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get sig\", () => {\r",
+									"    pm.environment.set(\"sig\", pm.response.json()[0]);\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/lists/medications/{{product-id}}/sigs",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"lists",
+								"medications",
+								"{{product-id}}",
+								"sigs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Indication",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get indication for med\", () => {\r",
+									"    var indication = pm.response.json()[0];\r",
+									"    if (!indication) {\r",
+									"        indication = {\r",
+									"            indicationId: 37,\r",
+									"            name: \"Pain\"\r",
+									"        }\r",
+									"    }\r",
+									"    pm.environment.set(\"indication-id\", indication.indicationId);\r",
+									"    pm.environment.set(\"indication-name\", indication.name);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/lists/medications/{{product-id}}/indications",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"lists",
+								"medications",
+								"{{product-id}}",
+								"indications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Medication",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var meds = JSON.parse(pm.environment.get('meds'));\r",
+									"var i = pm.environment.get('meds-i');\r",
+									"\r",
+									"i++;\r",
+									"pm.environment.set('meds-i', i);\r",
+									"\r",
+									"if (meds.length > i)\r",
+									"    postman.setNextRequest('Get Sig');\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": {{product-id}},\n    \"medicationName\": \"{{medication-name}}\",\n    \"medicationSchedule\": \"{{sig}}\",\n    \"indicationId\": {{indication-id}},\n    \"indicationName\": \"{{indication-name}}\",\n    \"isSelfPrescribed\": {{medication-is-self-prescribed}},\n    \"prescriberId\": {{medication-prescriber-id}},\n    \"prescriber\": {{medication-presriber}},\n    \"medicationStatus\": {{medication-status}}\n}"
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/medications",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"medications"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Analyze and Verify Problems",
+			"item": [
+				{
+					"name": "Analyze",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/analyze",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"analyze"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Problems",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"_ = require(\"lodash\");\r",
+									"\r",
+									"pm.test(\"has problems from analyze\", () => {\r",
+									"    var data = pm.response.json();\r",
+									"\r",
+									"    pm.expect(data).to.not.be.empty;\r",
+									"\r",
+									"    var problemIds = _(data)\r",
+									"                .flatMap(x => x.types)\r",
+									"                .flatMap(x => x.problems)\r",
+									"                .map(x => x.id);\r",
+									"    pm.environment.set(\"problem-ids\", JSON.stringify(problemIds));\r",
+									"    pm.environment.set(\"problem-ids-i\", 0)\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/problems",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"problems"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Problem",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var problemIds = JSON.parse(pm.environment.get(\"problem-ids\"));\r",
+									"var i = pm.environment.get(\"problem-ids-i\");\r",
+									"pm.expect(problemIds.length).to.be.greaterThan(i);\r",
+									"var problemId = problemIds[i];\r",
+									"\r",
+									"pm.environment.set(\"problem-id\", problemId);\r",
+									"\r",
+									"i++;\r",
+									"pm.environment.set(\"problem-ids-i\", i)\r",
+									"\r",
+									"if (i < problemIds.length)\r",
+									"    postman.setNextRequest(\"Verify Problem\");\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"problemId\": {{problem-id}},\n    \"action\": 1,\n    \"actionReasonId\": null,\n    \"adherenceBarrierId\": null,\n    \"sendFaxToProvider\": false\n}"
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/problems",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"problems"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Add PIP",
+			"item": [
+				{
+					"name": "Add Needs Therapy Problem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"type\": 8,\r\n    \"ruleId\": 51,\r\n    \"indicationId\": 3079,\r\n    \"indication\": \"Pain\",\r\n    \"selectedMessageForPatientId\": 3,\r\n    \"action\": 1,\r\n    \"sendFaxToProvider\": false,\r\n    \"variables\": [\r\n    \t{\r\n    \t\t\"variableName\": \"try-this\",\r\n    \t\t\"value\": \"some other drug to try\"\r\n    \t}\r\n\t]\r\n}"
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/problems",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"problems"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Needs Therapy Problem Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"get needs therapy problem id\", () => {\r",
+									"    var problemId = _(pm.response.json())\r",
+									"        .find(x => x.source == 3) // Pharmacist\r",
+									"        .types.find(x => x.type == 8) // Needs Therapy\r",
+									"        .problems[0].id;\r",
+									"    pm.environment.set(\"needs-therapy-problem-id\", problemId);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/problems",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"problems"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Needs Therapy Prescriber Follow Up",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"problemId\": {{needs-therapy-problem-id}},\r\n    \"type\": 1,\r\n    \"description\": \"Follow up on some stuff with the Prescriber on Needs Therapy.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify PIP Follow-Up",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"_ = require(\"lodash\");\r",
+									"\r",
+									"pm.test(\"verify needs therapy follow-up added\", () => {\r",
+									"    var followUp = _(pm.response.json().followUps)\r",
+									"        .filter(x => x.type == \"Prescriber\")\r",
+									"        .flatMap(x => x.details)\r",
+									"        .find(x => x.type == \"NeedsTherapy\")\r",
+									"        .followUps[0];\r",
+									"    pm.expect(followUp).to.be.ok;\r",
+									"    pm.expect(followUp.indication).to.equal(\"Pain\");\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Add Prescriber Follow Up",
+			"item": [
+				{
+					"name": "Add Prescriber Follow Up",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var problemIds = JSON.parse(pm.environment.get(\"problem-ids\"));\r",
+									"var problemId = problemIds[0];\r",
+									"pm.environment.set(\"problem-id\", problemId);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"problemId\": {{problem-id}},\r\n    \"type\": 1,\r\n    \"description\": \"Follow up on some stuff with the Prescriber.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Prescriber Follow-Up Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"_ = require(\"lodash\");\r",
+									"\r",
+									"pm.test(\"get prescriber follow up id\", () => {\r",
+									"    var followUp = _(pm.response.json().followUps)\r",
+									"        .filter(x => x.type == \"Prescriber\")\r",
+									"        .flatMap(x => x.details)\r",
+									"        .filter(x => x.type != \"NeedsTherapy\")\r",
+									"        .flatMap(x => x.followUps)\r",
+									"        .head();\r",
+									"    pm.expect(followUp).to.be.ok;\r",
+									"    pm.environment.set(\"prescriber-follow-up-id\", followUp.id);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get Phone Numbers",
+			"item": [
+				{
+					"name": "Get Follow-Up Prescribers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"there should be followUpPrescribers\", () => {\r",
+									"    pm.expect(pm.response.json().followUpPrescribers).to.not.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups/{{prescriber-follow-up-id}}/prescribers",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups",
+								"{{prescriber-follow-up-id}}",
+								"prescribers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Follow-Up Pharmacies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"there should be followUpPharmacies\", () => {\r",
+									"    pm.expect(pm.response.json().followUpPharmacies).to.not.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups/{{prescriber-follow-up-id}}/pharmacies",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups",
+								"{{prescriber-follow-up-id}}",
+								"pharmacies"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Administer",
+			"item": [
+				{
+					"name": "Administer Opportunity",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"consultLanguage\": \"EN\",\r\n    \"remarks\": \"Some extra remarks.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/administered",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"administered"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Med Rec Opps - Pending Closure",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"opportunity-id is in the list\", function() {\r",
+									"    var data = pm.response.json();\r",
+									"    var oppId = pm.environment.get(\"opportunity-id\");\r",
+									"    pm.expect(data.map(e => (e.opportunityId))).to.include(oppId);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain, application/json, text/json"
+							}
+						],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/MedRec/PendingClosure",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"MedRec",
+								"PendingClosure"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Add Follow Up Notes",
+			"item": [
+				{
+					"name": "Add Follow Up Note",
+					"item": [
+						{
+							"name": "Get Canned Follow-up Notes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"get left-message text\", () => {\r",
+											"    var noteText = _(pm.response.json())\r",
+											"        .find(x => x.name == \"left-message\")\r",
+											"        .noteText;\r",
+											"    pm.environment.set(\"follow-up-note-text\", noteText);\r",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{mobile-api-url}}/lists/canned-followup-notes",
+									"host": [
+										"{{mobile-api-url}}"
+									],
+									"path": [
+										"lists",
+										"canned-followup-notes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Follow Up Note",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"followUpId\": {{prescriber-follow-up-id}},\r\n    \"noteText\": \"{{follow-up-note-text}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups/notes",
+									"host": [
+										"{{mobile-api-url}}"
+									],
+									"path": [
+										"opportunities",
+										"my",
+										"{{opportunity-id}}",
+										"follow-ups",
+										"notes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Verify Follow Up Note",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"found expected follow-up note\", () => {\r",
+											"    var note = _(pm.response.json())\r",
+											"        .find(x => x.noteText == pm.environment.get(\"follow-up-note-text\"));\r",
+											"    pm.expect(note).to.not.be.undefined;\r",
+											"    pm.environment.set(\"follow-up-note-id\", note.id);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups/{{prescriber-follow-up-id}}/notes",
+									"host": [
+										"{{mobile-api-url}}"
+									],
+									"path": [
+										"opportunities",
+										"my",
+										"{{opportunity-id}}",
+										"follow-ups",
+										"{{prescriber-follow-up-id}}",
+										"notes"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Update Follow Up Note",
+					"item": [
+						{
+							"name": "Update Follow Up Note",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"follow-up-note-text\", pm.environment.get(\"follow-up-note-text\") + \" updated\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": {{follow-up-note-id}},\r\n    \"noteText\": \"{{follow-up-note-text}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups/notes",
+									"host": [
+										"{{mobile-api-url}}"
+									],
+									"path": [
+										"opportunities",
+										"my",
+										"{{opportunity-id}}",
+										"follow-ups",
+										"notes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Verify Updated Follow Up Note",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"found expected follow-up note\", () => {\r",
+											"    var note = _(pm.response.json())\r",
+											"        .find(x => x.noteText == pm.environment.get(\"follow-up-note-text\"));\r",
+											"    pm.expect(note).to.not.be.undefined;\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups/{{prescriber-follow-up-id}}/notes",
+									"host": [
+										"{{mobile-api-url}}"
+									],
+									"path": [
+										"opportunities",
+										"my",
+										"{{opportunity-id}}",
+										"follow-ups",
+										"{{prescriber-follow-up-id}}",
+										"notes"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Add Patient Follow Up",
+			"item": [
+				{
+					"name": "Add Patient Follow-Up",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var problemIds = JSON.parse(pm.environment.get(\"problem-ids\"));\r",
+									"var problemId = problemIds[0];\r",
+									"pm.environment.set(\"problem-id\", problemId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"problemId\": {{problem-id}},\r\n    \"type\": 3,\r\n    \"description\": \"Follow up on some stuff with the Patient.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient Follow-Up Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"_ = require(\"lodash\");\r",
+									"\r",
+									"pm.test(\"get patient follow up id\", () => {\r",
+									"    var followUp = _(pm.response.json().followUps)\r",
+									"        .filter(x => x.type == \"Patient\")\r",
+									"        .flatMap(x => x.details)\r",
+									"        .flatMap(x => x.followUps)\r",
+									"        .head();\r",
+									"    pm.environment.set(\"patient-follow-up-id\", followUp.id);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Close Follow-Ups",
+			"item": [
+				{
+					"name": "Close Prescriber Follow-Up",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"close follow-up successful\", () =>{\r",
+									"    pm.response.to.have.status(200)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": {{prescriber-follow-up-id}},\r\n    \"type\": 1,\r\n    \"description\": \"Follow up on some stuff with the Prescriber.\",\r\n    \"additionalNotes\": \"some additional prescriber notes\",\r\n    \"sendFaxToPrescriber\": true,\r\n    \"closeStatus\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Close Patient Follow-Up",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"close follow-up successful\", () =>{\r",
+									"    pm.response.to.have.status(200)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": {{patient-follow-up-id}},\r\n    \"type\": 3,\r\n    \"description\": \"Follow up on some stuff with the Patient.\",\r\n    \"additionalNotes\": \"some additional patient notes\",\r\n    \"closeStatus\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/follow-ups",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"follow-ups"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Complete Opportunity",
+			"item": [
+				{
+					"name": "Get Med Rec Form Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/MedRec/{{opportunity-id}}/form-data",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"MedRec",
+								"{{opportunity-id}}",
+								"form-data"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Submission Agreements",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"set submission agreements\", () => {\r",
+									"    var subs = pm.response.json();\r",
+									"    var subIds = subs.map(x => x.id);\r",
+									"    pm.environment.set(\"sub-ids\", JSON.stringify(subIds));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mobile-api-url}}/lists/submission-agreements?serviceType=MedRec",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"lists",
+								"submission-agreements"
+							],
+							"query": [
+								{
+									"key": "serviceType",
+									"value": "MedRec"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Opportunity",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"submissionAgreements\": {{sub-ids}}\n}"
+						},
+						"url": {
+							"raw": "{{mobile-api-url}}/opportunities/my/{{opportunity-id}}/complete",
+							"host": [
+								"{{mobile-api-url}}"
+							],
+							"path": [
+								"opportunities",
+								"my",
+								"{{opportunity-id}}",
+								"complete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access-token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
